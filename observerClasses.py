@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 #vai ser os dados que os observadores vão receber
 class DataEvent():
-    piscou = False
+    piscou = True
     tempo = 0
 
 #cria o observavel que tem funções para colocar tirar e notificar
@@ -28,4 +28,3 @@ class Observer(ABC):
     @abstractmethod
     def update(self, subject: Observable, dataEvent:DataEvent) -> None:
          pass
-

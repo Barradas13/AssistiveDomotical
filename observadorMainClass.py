@@ -20,11 +20,19 @@ def pegaWebcam(arquivo, video):
 
 class observadorMainClass(Observable):
 
+    def __init__(self, modoCapture) -> None:
+        video = cv2.VideoCapture(modoCapture)
+        self._observers = []
+        self.video_capture, self.detector, self.preditor = pegaWebcam("shape_predictor_68_face_landmarks.dat", video)
+        self.olhoFechado = False
+        self.timeFinal = 0
+        self.timeInicial = 0
+
+
     #coloca novos observadores
     def attach(self, observer: Observer) -> None:
         print("Subject: Attached an observer.")
         self._observers.append(observer)
-
 
     #remove os observadores
     def detach(self, observer: Observer) -> None:
@@ -36,13 +44,6 @@ class observadorMainClass(Observable):
         print("Observable: Notifying observers...")
         for observer in self._observers:
             observer.update(self, dataEvent)
-
-
-    def __init__(self, modoCapture) -> None:
-        video = cv2.VideoCapture(modoCapture)
-        self._observers = []
-        self.video_capture, self.detector, self.preditor = pegaWebcam("shape_predictor_68_face_landmarks.dat", video)
-
 
     def reconhecendoFacesNoFrame(self):
         self.frame = cv2.flip(self.frame,180) 
@@ -94,28 +95,33 @@ class observadorMainClass(Observable):
                                                 (self.shapePrincipal.part(42).x, self.shapePrincipal.part(42).y))                                         
 
     def verificacaoEnvioParaObserver(self):
+        
         timeInicial = 0
-        olhoFechado = False
+        
+        if self.detections:
+            #print("tem rosto")
+            if self.EAR_dir < 0.23:      
+                    cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)    
+                    if not self.olhoFechado:
+                        self.timeInicial = time.time()
+                    self.olhoFechado = True
+            else:
+                cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
 
-        if self.EAR_dir < 0.23 and self.EAR_dir != 0:      
-                cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)    
-                if not olhoFechado:
-                    timeInicial = time.time()
-                olhoFechado = True
-        else:
-            cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
+                    #se o olho estivesse fechado mas no momento esta aberto quer dizer que o usuario acabou de abrir o olho, logo se pega o tempo final e faz o calculo do tempo que o olho ficou fechado
 
-                #se o olho estivesse fechado mas no momento esta aberto quer dizer que o usuario acabou de abrir o olho, logo se pega o tempo final e faz o calculo do tempo que o olho ficou fechado
+                if self.olhoFechado:
+                    self.timeFinal = time.time()
+                    tempo = self.timeFinal - self.timeInicial
+                    self.olhoFechado = False
+                    
+                    if tempo > 0.3:
+                        print("Piscou")
+                        dados = DataEvent()
+                        dados.tempo = tempo
+                        print("tempo evento:",tempo )
 
-            if olhoFechado:
-                timeFinal = time.time()
-                tempo = timeFinal - timeInicial
-                olhoFechado = False
-
-                if tempo > 0.3:
-                    dados = DataEvent(tempo)
-
-                    self.notify(dados)
+                        self.notify(dados)
 
     def executar(self):
         while True:
@@ -133,6 +139,10 @@ class observadorMainClass(Observable):
 
             cv2.imshow('img', self.frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                dados = DataEvent()
+                dados.tempo = False
+                dados.piscou = False
+                self.notify(dados)
                 break
 
 if __name__ == "__main__":

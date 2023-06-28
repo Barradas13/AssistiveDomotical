@@ -9,7 +9,6 @@ class Menu(Observer):
         self.botoes = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'YouTube']
         self.botao_selecionado = 0
         self.window = None
-        
 
     def create_layout(self):
         layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'blue'), size=(15, 5)) for i, button in enumerate(self.botoes)]]
@@ -66,7 +65,11 @@ class Menu(Observer):
             elif dataEvent.piscou and dataEvent.tempo > 0.7:
                 self.interagir_botao_selecionado()
                 self.mostrar_prompt_interacao()
-            elif not dataEvent.piscou and not dataEvent.tempo:
-                self.window.close()
         except AttributeError:
             pass
+
+        print(self.selection)
+
+if __name__ == "__main__":
+    menu = Menu()
+    menu.run()
