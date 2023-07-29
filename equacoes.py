@@ -1,5 +1,6 @@
 import math
 
+
 def razaoDistOlhos(p2, p6, p3, p5, p1, p4):
     a = p2[0] - p6[0]
     b = p2[1] - p6[1]

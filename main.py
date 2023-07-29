@@ -1,4 +1,4 @@
-from observadorMainClass import observadorMainClass
+from observadoMainClass import observadorMainClass
 from menuMainClass import Menu
 
 
@@ -13,3 +13,4 @@ if __name__ == "__main__":
     x.start()  
     
     sistema.executar()
+        

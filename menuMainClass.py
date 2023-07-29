@@ -9,6 +9,7 @@ class Menu(Observer):
         self.botoes = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'YouTube']
         self.botao_selecionado = 0
         self.window = None
+        self.parar = False
         
 
     def create_layout(self):
@@ -20,7 +21,7 @@ class Menu(Observer):
 
         while True:
             event, values = self.window.read()
-            if event in (sg.WINDOW_CLOSED, 'Exit'):
+            if event in (sg.WINDOW_CLOSED, 'Exit') or self.parar:
                 break
 
             for i, button in enumerate(self.botoes):
@@ -68,5 +69,6 @@ class Menu(Observer):
                 self.mostrar_prompt_interacao()
             elif not dataEvent.piscou and not dataEvent.tempo:
                 self.window.close()
+                self.parar = True
         except AttributeError:
             pass
