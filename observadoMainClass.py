@@ -3,16 +3,16 @@ import cv2
 import dlib
 import os
 import equacoes
-import time
 from observerClasses import Observable, Observer, DataEvent
+import time
 
 def pegaWebcam(arquivo, video):
     video_capture = video
 
     video_capture.set(int(video_capture.get(5)), 30)
 
-    video_capture.set(int(video_capture.get(3)), 320)
-    video_capture.set(int(video_capture.get(3)), 130)
+    video_capture.set(int(video_capture.get(3)), 960)
+    video_capture.set(int(video_capture.get(3)), 540)
     detector = dlib.get_frontal_face_detector() 
     predictor = dlib.shape_predictor(os.path.join(arquivo)) 
     
@@ -27,6 +27,9 @@ class observadorMainClass(Observable):
         self.olhoFechado = False
         self.timeFinal = 0
         self.timeInicial = 0
+        self.pre_timeFrame = 0
+        self.new_timeFrame = 0
+        self.framesOlhoFechado = 0 
 
 
     #coloca novos observadores
@@ -95,33 +98,35 @@ class observadorMainClass(Observable):
                                                 (self.shapePrincipal.part(42).x, self.shapePrincipal.part(42).y))                                         
 
     def verificacaoEnvioParaObserver(self):
-        
-        timeInicial = 0
-        
+
         if self.detections:
             #print("tem rosto")
-            if self.EAR_dir < 0.23:      
-                    cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)    
-                    if not self.olhoFechado:
-                        self.timeInicial = time.time()
+            if self.EAR_dir < 0.23:         
+                    self.framesOlhoFechado += 1
                     self.olhoFechado = True
+                    if self.framesOlhoFechado / self.fps <= 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                        cv2.circle(self.frame, (10, 10), 10, (255,0,0), thickness=-1)
+                    elif self.framesOlhoFechado / self.fps > 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                        cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
+                    else:
+                        cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
             else:
                 cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
 
                     #se o olho estivesse fechado mas no momento esta aberto quer dizer que o usuario acabou de abrir o olho, logo se pega o tempo final e faz o calculo do tempo que o olho ficou fechado
 
                 if self.olhoFechado:
-                    self.timeFinal = time.time()
-                    tempo = self.timeFinal - self.timeInicial
                     self.olhoFechado = False
-                    
-                    if tempo > 0.3:
+                    print(self.framesOlhoFechado, self.fps)
+                    if self.framesOlhoFechado > self.fps - self.fps / 2:
                         print("Piscou")
                         dados = DataEvent()
-                        dados.tempo = tempo
-                        print("tempo evento:",tempo )
+                        dados.tempo = self.framesOlhoFechado / self.fps
+                        print("tempo evento:", self.framesOlhoFechado / self.fps)
 
                         self.notify(dados)
+
+                    self.framesOlhoFechado = 0 
 
     def executar(self):
         while True:
@@ -136,6 +141,13 @@ class observadorMainClass(Observable):
             self.reconhecendoFacesNoFrame()
 
             self.verificacaoEnvioParaObserver()
+
+            self.frame = cv2.resize(self.frame, (1000,800))
+            self.new_timeFrame=time.time()
+            self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
+            self.pre_timeFrame = self.new_timeFrame
+            self.fps = int(self.fps)
+            cv2.putText(self.frame, str(self.fps),(8,80), cv2.FONT_HERSHEY_SIMPLEX,3,(100,255,0),4)
 
             cv2.imshow('img', self.frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
