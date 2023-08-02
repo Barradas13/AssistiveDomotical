@@ -41,18 +41,20 @@ class Menu(Observer):
         self.botao_selecionado = (self.botao_selecionado + 1) % len(self.botoes)
         print("")
 
-    def interagir_botao_selecionado(self):
+    def interagir_botao_selecionado(self, tempo):
         selected_button = self.botoes[self.botao_selecionado]
         print(f'Interacting with {selected_button} button!')
         print(selected_button)
         if selected_button == 'LEFT':
-            mouse.moveLeft(1)
+            mouse.moveLeft(tempo)
         elif selected_button == 'RIGHT':
-            mouse.moveRight(1)
+            mouse.moveRight(tempo)
         elif selected_button == 'UP':
-            mouse.moveUp(1)
+            mouse.moveUp(tempo)
         elif selected_button == 'DOWN':
-            mouse.moveDown(1)
+            mouse.moveDown(tempo)
+        elif selected_button == 'CLICK':
+            mouse.click()
         return selected_button
     
 
@@ -71,12 +73,12 @@ class Menu(Observer):
 
     def update(self,  subject: Observable, dataEvent: DataEvent) -> None:
         try:
-            if dataEvent.piscou and dataEvent.tempo < 0.7:
+            if dataEvent.piscou and dataEvent.tempo <= 1:
                 self.selecionar_botao_direita()
                 self.highlight_botaoSelecionado()
                 self.mostrar_prompt_interacao()
-            elif dataEvent.piscou and dataEvent.tempo > 0.7:
-                self.interagir_botao_selecionado()
+            elif dataEvent.piscou and dataEvent.tempo > 1:
+                self.interagir_botao_selecionado(dataEvent.tempo)
                 self.mostrar_prompt_interacao()
             elif not dataEvent.piscou and not dataEvent.tempo:
                 self.window.close()
