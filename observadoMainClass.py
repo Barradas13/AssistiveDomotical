@@ -104,10 +104,11 @@ class observadorMainClass(Observable):
             if self.EAR_dir < 0.23:         
                     self.framesOlhoFechado += 1
                     self.olhoFechado = True
-                    if self.framesOlhoFechado / self.fps <= 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
-                        cv2.circle(self.frame, (10, 10), 10, (255,0,0), thickness=-1)
-                    elif self.framesOlhoFechado / self.fps > 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
-                        cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
+                    if self.fps:
+                        if self.framesOlhoFechado / self.fps <= 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                            cv2.circle(self.frame, (10, 10), 10, (255,0,0), thickness=-1)
+                        elif self.framesOlhoFechado / self.fps > 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                            cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
                     else:
                         cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
             else:
@@ -142,7 +143,7 @@ class observadorMainClass(Observable):
 
             self.verificacaoEnvioParaObserver()
 
-            self.frame = cv2.resize(self.frame, (1000,800))
+            self.frame = cv2.resize(self.frame, (600,400))
             self.new_timeFrame=time.time()
             self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
             self.pre_timeFrame = self.new_timeFrame
