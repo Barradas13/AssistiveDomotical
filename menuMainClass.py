@@ -2,18 +2,19 @@ import observerClasses
 from observerClasses import DataEvent, Observable
 import PySimpleGUI as sg
 from observerClasses import Observer
+import mouse
 
 
 class Menu(Observer):
     def __init__(self):
-        self.botoes = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'YouTube']
-        self.botao_selecionado = 0
+        self.botoes = ['LEFT', 'RIGHT', 'UP', 'DOWN', 'CLICK', 'DOUBLECLICK']
+        self.botao_selecionado = -1
         self.window = None
         self.parar = False
         
 
     def create_layout(self):
-        layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'blue'), size=(15, 5)) for i, button in enumerate(self.botoes)]]
+        layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'blue'), size=(12, 4)) for i, button in enumerate(self.botoes)]]
         return layout
 
     def run(self):
@@ -43,7 +44,17 @@ class Menu(Observer):
     def interagir_botao_selecionado(self):
         selected_button = self.botoes[self.botao_selecionado]
         print(f'Interacting with {selected_button} button!')
+        print(selected_button)
+        if selected_button == 'LEFT':
+            mouse.moveLeft(1)
+        elif selected_button == 'RIGHT':
+            mouse.moveRight(1)
+        elif selected_button == 'UP':
+            mouse.moveUp(1)
+        elif selected_button == 'DOWN':
+            mouse.moveDown(1)
         return selected_button
+    
 
     def mostrar_prompt_interacao(self):
         selected_button = self.botoes[self.botao_selecionado]
