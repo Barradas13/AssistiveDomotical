@@ -11,8 +11,8 @@ def pegaWebcam(arquivo, video):
 
     video_capture.set(int(video_capture.get(5)), 30)
 
-    video_capture.set(int(video_capture.get(3)), 960)
-    video_capture.set(int(video_capture.get(3)), 540)
+    video_capture.set(int(video_capture.get(3)), 1080)
+    video_capture.set(int(video_capture.get(3)), 640)
     detector = dlib.get_frontal_face_detector() 
     predictor = dlib.shape_predictor(os.path.join(arquivo)) 
     
@@ -66,11 +66,7 @@ class observadorMainClass(Observable):
         for k,d in enumerate(self.detections):
             
             shape = self.preditor(self.clahe_image, d)
-            for i in range(1,68):  
-                #coloca os pontos dos rostos e os numeros dos respectivos              
-                cv2.circle(self.frame, (shape.part(i).x, shape.part(i).y), 1, (0,255,0), thickness=-1)
-                self.frame = cv2.putText(self.frame, str(i), (shape.part(i).x, shape.part(i).y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 
-                                (0, 0, 255), 1, cv2.LINE_AA, False)
+            
             
             area = (shape.part(15).x - shape.part(1).x) * (shape.part(8).y - shape.part(19).y)
 
@@ -80,6 +76,12 @@ class observadorMainClass(Observable):
                 self.shapePrincipal = shape
             else:
                 pass
+
+        for i in range(1,68):  
+                #coloca os pontos dos rostos e os numeros dos respectivos              
+            cv2.circle(self.frame, (self.shapePrincipal.part(i).x, self.shapePrincipal.part(i).y), 1, (0,255,0), thickness=-1)
+            self.frame = cv2.putText(self.frame, str(i), (self.shapePrincipal.part(i).x, self.shapePrincipal.part(i).y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 
+                                (0, 0, 255), 1, cv2.LINE_AA, False)
     
 
     def pegandoPontosDosOlhos(self):
@@ -105,9 +107,9 @@ class observadorMainClass(Observable):
                     self.framesOlhoFechado += 1
                     self.olhoFechado = True
                     if self.fps:
-                        if self.framesOlhoFechado / self.fps <= 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                        if self.framesOlhoFechado / self.fps <= 1.5 and self.framesOlhoFechado > self.fps - self.fps / 2:
                             cv2.circle(self.frame, (10, 10), 10, (255,0,0), thickness=-1)
-                        elif self.framesOlhoFechado / self.fps > 1 and self.framesOlhoFechado > self.fps - self.fps / 2:
+                        elif self.framesOlhoFechado / self.fps > 1.5 and self.framesOlhoFechado > self.fps - self.fps / 2:
                             cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
                     else:
                         cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
@@ -143,7 +145,7 @@ class observadorMainClass(Observable):
 
             self.verificacaoEnvioParaObserver()
 
-            self.frame = cv2.resize(self.frame, (600,400))
+            self.frame = cv2.resize(self.frame, (1000,700))
             self.new_timeFrame=time.time()
             self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
             self.pre_timeFrame = self.new_timeFrame
