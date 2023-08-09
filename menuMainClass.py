@@ -2,8 +2,6 @@ import observerClasses
 from observerClasses import DataEvent, Observable
 import PySimpleGUI as sg
 from observerClasses import Observer
-import mouse
-
 
 class Menu(Observer):
     def __init__(self):

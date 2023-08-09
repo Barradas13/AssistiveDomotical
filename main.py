@@ -11,6 +11,5 @@ if __name__ == "__main__":
   
     x = threading.Thread(target=menu.run)  
     x.start()  
-    
+
     sistema.executar()
-        
