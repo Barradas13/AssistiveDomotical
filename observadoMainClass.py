@@ -131,6 +131,45 @@ class observadorMainClass(Observable):
 
                     self.framesOlhoFechado = 0 
 
+    def parametrizacao(self, tempo):
+        olho = []
+        baseTime = time.time()
+     
+        while (time.time() - baseTime < tempo):
+            self.ret, self.frame = self.video_capture.read()
+
+            self.frame = cv2.flip(self.frame,180) 
+            self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+            self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+            self.clahe_image = self.clahe.apply(self.gray)
+            self.detections = self.detector(self.clahe_image, 1)
+
+            self.reconhecendoFacesNoFrame()
+
+            olho.append(self.EAR_dir)
+
+            self.frame = cv2.resize(self.frame, (1000,700))
+            self.new_timeFrame=time.time()
+            self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
+            self.pre_timeFrame = self.new_timeFrame
+            self.fps = int(self.fps)
+            cv2.putText(self.frame, str(self.fps),(8,80), cv2.FONT_HERSHEY_SIMPLEX,3,(100,255,0),4)
+
+            cv2.imshow('img', self.frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                dados = DataEvent()
+                dados.tempo = False
+                dados.piscou = False
+                self.notify(dados)
+                break
+            
+            print(olho)
+            print(f"\n \n \n \n \n \n \n \n \n")
+            
+        cv2.destroyAllWindows()
+
+        return olho
+    
     def executar(self):
         while True:
             self.ret, self.frame = self.video_capture.read()
@@ -164,5 +203,5 @@ class observadorMainClass(Observable):
 
 
 if __name__ == "__main__":
-    sistema = observadorMainClass(0)
-    sistema.executar()
+    sistema = observadorMainClass("videoteste.mp4")
+    sistema.parametrizacao(3)
