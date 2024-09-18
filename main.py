@@ -1,6 +1,7 @@
 from observadoMainClass import observadorMainClass
 from menuMainClass import Menu
-
+import os
+import numpy as np
 
 import threading    
 

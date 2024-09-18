@@ -1,3 +1,5 @@
+import numpy as np
+
 import observerClasses
 import cv2
 import dlib
@@ -5,6 +7,7 @@ import os
 import equacoes
 from observerClasses import Observable, Observer, DataEvent
 import time
+
 
 def pegaWebcam(arquivo, video):
     video_capture = video
@@ -25,12 +28,13 @@ class observadorMainClass(Observable):
         self._observers = []
         self.video_capture, self.detector, self.preditor = pegaWebcam("shape_predictor_68_face_landmarks.dat", video)
         self.olhoFechado = False
-        self.timeFinal = 0
-        self.timeInicial = 0
+        self.tPiscou = 0
         self.pre_timeFrame = 0
         self.new_timeFrame = 0
-        self.framesOlhoFechado = 0 
-
+        self.resized_image = 0
+        self.EAR_dir = 0
+        self.EAR_esq = 0
+        self.contador = 0
 
     #coloca novos observadores
     def attach(self, observer: Observer) -> None:
@@ -49,22 +53,15 @@ class observadorMainClass(Observable):
             observer.update(self, dataEvent)
 
     def reconhecendoFacesNoFrame(self):
-        self.frame = cv2.flip(self.frame,180) 
-        self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        self.clahe_image = self.clahe.apply(self.gray)
 
-        self.detections = self.detector(self.clahe_image, 1)
         if self.detections:
             self.verificandoMaiorFace()
             self.pegandoPontosDosOlhos()
-
 
     def verificandoMaiorFace(self):
         areaMaior = 0
         
         for k,d in enumerate(self.detections):
-            
             shape = self.preditor(self.clahe_image, d)
             
             
@@ -80,7 +77,7 @@ class observadorMainClass(Observable):
         for i in range(1,68):  
                 #coloca os pontos dos rostos e os numeros dos respectivos              
             cv2.circle(self.frame, (self.shapePrincipal.part(i).x, self.shapePrincipal.part(i).y), 1, (0,255,0), thickness=-1)
-            self.frame = cv2.putText(self.frame, str(i), (self.shapePrincipal.part(i).x, self.shapePrincipal.part(i).y), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 
+            self.frame = cv2.putText(self.frame, str(i), (self.shapePrincipal.part(i).x, self.shapePrincipal.part(i).y), cv2.FONT_HERSHEY_SIMPLEX, 0.3,
                                 (0, 0, 255), 1, cv2.LINE_AA, False)
     
 
@@ -100,108 +97,96 @@ class observadorMainClass(Observable):
                                                 (self.shapePrincipal.part(42).x, self.shapePrincipal.part(42).y))                                         
 
     def verificacaoEnvioParaObserver(self):
-
         if self.detections:
-            #print("tem rosto")
-            if self.EAR_dir < 0.23:         
-                    self.framesOlhoFechado += 1
+
+            if self.detectar_piscada():
+                if not self.olhoFechado:
+                    self.tPiscou = time.time()
                     self.olhoFechado = True
-                    if self.fps:
-                        if self.framesOlhoFechado / self.fps <= 1.5 and self.framesOlhoFechado > self.fps - self.fps / 2:
-                            cv2.circle(self.frame, (10, 10), 10, (255,0,0), thickness=-1)
-                        elif self.framesOlhoFechado / self.fps > 1.5 and self.framesOlhoFechado > self.fps - self.fps / 2:
-                            cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
-                    else:
-                        cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
+
+                cv2.circle(self.frame, (10, 10), 10, (0,255,0), thickness=-1)
             else:
                 cv2.circle(self.frame, (10, 10), 10, (0,0,255), thickness=-1) 
 
-                    #se o olho estivesse fechado mas no momento esta aberto quer dizer que o usuario acabou de abrir o olho, logo se pega o tempo final e faz o calculo do tempo que o olho ficou fechado
-
                 if self.olhoFechado:
                     self.olhoFechado = False
-                    print(self.framesOlhoFechado, self.fps)
-                    if self.framesOlhoFechado > self.fps - self.fps / 2:
+
+                    if ( time.time() - self.tPiscou) > 0.5:
                         print("Piscou")
                         dados = DataEvent()
-                        dados.tempo = self.framesOlhoFechado / self.fps
-                        print("tempo evento:", self.framesOlhoFechado / self.fps)
+                        dados.tempo = time.time() - self.tPiscou
+                        print("tempo evento:", time.time() - self.tPiscou)
 
                         self.notify(dados)
 
-                    self.framesOlhoFechado = 0 
-
-    def parametrizacao(self, tempo):
-        olho = []
-        baseTime = time.time()
-     
-        while (time.time() - baseTime < tempo):
-            self.ret, self.frame = self.video_capture.read()
-
-            self.frame = cv2.flip(self.frame,180) 
-            self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-            self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            self.clahe_image = self.clahe.apply(self.gray)
-            self.detections = self.detector(self.clahe_image, 1)
-
-            self.reconhecendoFacesNoFrame()
-
-            olho.append(self.EAR_dir)
-
-            self.frame = cv2.resize(self.frame, (1000,700))
-            self.new_timeFrame=time.time()
-            self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
-            self.pre_timeFrame = self.new_timeFrame
-            self.fps = int(self.fps)
-            cv2.putText(self.frame, str(self.fps),(8,80), cv2.FONT_HERSHEY_SIMPLEX,3,(100,255,0),4)
-
-            cv2.imshow('img', self.frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                dados = DataEvent()
-                dados.tempo = False
-                dados.piscou = False
-                self.notify(dados)
-                break
-            
-            print(olho)
-            print(f"\n \n \n \n \n \n \n \n \n")
-            
-        cv2.destroyAllWindows()
-
-        return olho
+                    self.tPiscou = 0
     
+    def setandoFrame(self):
+        self.frame = cv2.flip(self.frame, 180)
+        self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        self.clahe_image = self.clahe.apply(self.gray)
+
+    def pegandoFrame(self):
+        self.ret, self.frame = self.video_capture.read()
+
+    def configurandoDetector(self):
+        self.detections = self.detector(self.clahe_image, 0)
+
+    def configurandoFrameMostrar(self):
+        self.new_timeFrame = time.time()
+        self.fps = 1 / (self.new_timeFrame - self.pre_timeFrame)
+        self.pre_timeFrame = self.new_timeFrame
+        self.fps = int(self.fps)
+        cv2.putText(self.frame, str(self.fps), (8, 80), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 4)
+
+    def mostraFrame(self):
+        cv2.imshow('img', self.frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            dados = DataEvent()
+            dados.tempo = False
+            dados.piscou = False
+            self.notify(dados)
+            return 1
+
+    def calibrar_razao_olhos(self, amostras=100):
+
+        self.razoes_olhos = []
+        print("Calibração: Por favor, pisque várias vezes...")
+
+        self.razao_olhos = self.EAR_dir()
+        self.razoes_olhos.append(self;razao_olhos)
+
+        self.razao_min = np.min(razoes_olhos)
+        self;razao_max = np.max(razoes_olhos)
+
+        # Definir limiar para olhos abertos/fechados baseado no ciclo de piscadas do usuário
+        self.limiar = (razao_min + razao_max) / 2
+
+    def detectar_piscada(self):
+
+        # Verifica se a razão dos olhos atual indica olhos fechados
+        if self.EAR_dir <= self.limiar:
+            return False  # Olhos fechados
+        return True  # Olhos abertos
+
     def executar(self):
         while True:
-            self.ret, self.frame = self.video_capture.read()
 
-            self.frame = cv2.flip(self.frame,180) 
-            self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-            self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            self.clahe_image = self.clahe.apply(self.gray)
-            self.detections = self.detector(self.clahe_image, 1)
+            self.pegandoFrame()
+            self.setandoFrame()
 
+            self.configurandoDetector()
             self.reconhecendoFacesNoFrame()
-
+            self.configurandoFrameMostrar()
             self.verificacaoEnvioParaObserver()
 
-            self.frame = cv2.resize(self.frame, (1000,700))
-            self.new_timeFrame=time.time()
-            self.fps = 1/(self.new_timeFrame-self.pre_timeFrame)
-            self.pre_timeFrame = self.new_timeFrame
-            self.fps = int(self.fps)
-            cv2.putText(self.frame, str(self.fps),(8,80), cv2.FONT_HERSHEY_SIMPLEX,3,(100,255,0),4)
-
-            cv2.imshow('img', self.frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                dados = DataEvent()
-                dados.tempo = False
-                dados.piscou = False
-                self.notify(dados)
+            if self.mostraFrame():
                 break
 
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    sistema = observadorMainClass("videoteste.mp4")
-    sistema.parametrizacao(3)
+    sistema = observadorMainClass("video.mp4")
+    sistema.executar()

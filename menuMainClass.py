@@ -5,7 +5,7 @@ from observerClasses import Observer
 
 class Menu(Observer):
     def __init__(self):
-        self.botoes = ['PRETO', 'AZUL', 'VERMELHO', 'VERDE', 'ROXO']
+        self.botoes = ['TELEVISÃO', 'LUZ DA SALA', 'LUZ DA COZINHA', 'AR CONDICIONADO']
         self.botao_selecionado = -1
         self.window = None
         self.parar = False
@@ -13,13 +13,11 @@ class Menu(Observer):
         
 
     def create_layout(self):
-        layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'blue'), size=(12, 6)) for i, button in enumerate(self.botoes)], 
-                  [sg.Button('QUADRADO', key='SQUARE', size=(69,14))]]
+        layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'black'), size=(13, 6)) for i, button in enumerate(self.botoes)]]
         return layout
 
     def run(self):
-        self.window = sg.Window('MENU INTERAÇÃO FACIAL', self.create_layout(), size=(605, 400))
-
+        self.window = sg.Window('MENU INTERAÇÃO FACIAL', self.create_layout(), size=(500, 130))
         while self.isAlive:
             event, values = self.window.read()
             if event in (sg.WINDOW_CLOSED, 'Exit') or self.parar:
@@ -46,16 +44,6 @@ class Menu(Observer):
         selected_button = self.botoes[self.botao_selecionado]
         print(f'Interacting with {selected_button} button!')
         print(selected_button)
-        if selected_button == 'PRETO':
-            self.window[f'SQUARE'].update(button_color=('white', 'black'))
-        elif selected_button == 'AZUL':
-            self.window[f'SQUARE'].update(button_color=('white', 'blue'))
-        elif selected_button == 'VERMELHO':
-            self.window[f'SQUARE'].update(button_color=('white', 'red'))
-        elif selected_button == 'VERDE':
-            self.window[f'SQUARE'].update(button_color=('white', 'green'))
-        elif selected_button == 'ROXO':
-            self.window[f'SQUARE'].update(button_color=('white', 'purple'))
         return selected_button
     
 
@@ -67,9 +55,9 @@ class Menu(Observer):
     def highlight_botaoSelecionado(self):
         for i, button in enumerate(self.botoes):
             if i == self.botao_selecionado:
-                self.window[f'button_{i}'].update(button_color=('white', 'green'))
-            else:
                 self.window[f'button_{i}'].update(button_color=('white', 'blue'))
+            else:
+                self.window[f'button_{i}'].update(button_color=('white', 'black'))
 
 
     def update(self,  subject: Observable, dataEvent: DataEvent) -> None:
@@ -83,7 +71,6 @@ class Menu(Observer):
                 self.mostrar_prompt_interacao()
             elif not dataEvent.piscou and not dataEvent.tempo:
                 self.isAlive = False
-                print("chamou")
                 self.window.close()
                 self.parar = True
                 
