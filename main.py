@@ -7,9 +7,10 @@ import threading
 
 if __name__ == "__main__":
     sistema = observadorMainClass(0)
+    sistema.calibrar_razao_olhos()
     menu = Menu()
     sistema.attach(menu)
-    sistema.calibrar_razao_olhos()
+
     x = threading.Thread(target=menu.run)  
     x.start()  
 
