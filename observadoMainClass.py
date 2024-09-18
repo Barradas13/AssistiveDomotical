@@ -149,19 +149,24 @@ class observadorMainClass(Observable):
             self.notify(dados)
             return 1
 
-    def calibrar_razao_olhos(self, amostras=100):
+    def calibrar_razao_olhos(self, amostras=200):
 
         self.razoes_olhos = []
         print("Calibração: Por favor, pisque várias vezes...")
 
-        self.razao_olhos = self.EAR_dir()
-        self.razoes_olhos.append(self;razao_olhos)
+        for i in range(amostras):
+            if amostras/2 > i:
+                print("Mantenha os olhos abertos")
+            else:
+                print("Mantenha os olhos FECHADOS")
+            self.razao_olhos = self.EAR_dir()
+            self.razoes_olhos.append(self.razao_olhos)
 
-        self.razao_min = np.min(razoes_olhos)
-        self;razao_max = np.max(razoes_olhos)
+        self.razao_min = np.min(self.razoes_olhos)
+        self.razao_max = np.max(self.razoes_olhos)
 
         # Definir limiar para olhos abertos/fechados baseado no ciclo de piscadas do usuário
-        self.limiar = (razao_min + razao_max) / 2
+        self.limiar = (self.razao_min + self.razao_max) / 2
 
     def detectar_piscada(self):
 
