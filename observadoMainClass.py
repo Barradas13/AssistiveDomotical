@@ -35,6 +35,7 @@ class observadorMainClass(Observable):
         self.resized_image = 0
         self.EAR_dir = 0
         self.EAR_esq = 0
+        self.limiar = 0.27
 
     # coloca novos observadores
     def attach(self, observer: Observer) -> None:

@@ -6,11 +6,11 @@ import numpy as np
 import threading    
 
 if __name__ == "__main__":
-    sistema = observadorMainClass(0)
-    sistema.calibrar_razao_olhos()
-    print(sistema.razao_max)
-    print(sistema.limiar)
-    print(sistema.razao_min)
+    sistema = observadorMainClass("video.mp4")
+    #sistema.calibrar_razao_olhos()
+    #print(sistema.razao_max)
+    #print(sistema.limiar)
+    #print(sistema.razao_min)
 
     menu = Menu()
     sistema.attach(menu)

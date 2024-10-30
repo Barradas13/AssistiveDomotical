@@ -1,5 +1,0 @@
-cmake==3.26.3
-dlib==19.24.1
-numpy==1.24.3
-opencv-python==4.7.0.72
-PySimpleGUI==4.60.5
