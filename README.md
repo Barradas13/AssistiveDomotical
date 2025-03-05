@@ -177,3 +177,21 @@ This system provides a robust foundation for eye-controlled interfaces, with pot
 - Hands-free device control
 - Behavioral research
 
+## **Contributing**  
+
+Contributions are welcome! Follow these steps to contribute:  
+
+1. Fork the repository.  
+2. Create a new branch:  
+   ```sh
+   git checkout -b feature-branch-name
+   ```
+3. Make your changes and commit them:  
+   ```sh
+   git commit -m 'Add new feature'
+   ```
+4. Push to the branch:  
+   ```sh
+   git push origin feature-branch-name
+   ```
+5. Open a **pull request** and describe your changes.  
