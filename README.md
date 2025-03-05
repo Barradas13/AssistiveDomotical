@@ -146,8 +146,34 @@ numpy = "^1.24.3"
 
 ---
 
+## **Installation**  
+
+To install and run this project, follow these steps:  
+
+1. Clone the repository:  
+   ```sh
+   git clone https://github.com/Barradas13/AssistiveDomotical.git
+   ```
+2. Navigate to the project directory and activate the virtual environment:  
+   ```sh
+   cd AssistiveDomotical
+   ```
+3. Install dependencies:  
+   ```sh
+   pip install poetry
+   poetry install
+   ```
+4. Apply migrations and start the code:  
+   ```sh
+   poetry shell
+   python main.py
+   ```
+
+---
+
 This system provides a robust foundation for eye-controlled interfaces, with potential applications in:
 - Accessibility tools
 - Driver drowsiness detection
 - Hands-free device control
 - Behavioral research
+
