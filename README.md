@@ -1,28 +1,22 @@
-Here's a detailed explanation of the eye blink detection system based on the code:
+# AssistiveDomotical
 
-### 🌟 Key Features
+### Key Features
 
-1. **Real-Time Eye Blink Detection** 👁️
+1. **Real-Time Eye Blink Detection**
    - Uses facial landmarks (68-point model) with `dlib` library
    - Calculates Eye Aspect Ratio (EAR) to detect blinks
    - Customizable detection threshold with auto-calibration
 
-2. **Observer Pattern Implementation** 🔄
+2. **Observer Pattern Implementation** 
    - Observable (`observadorMainClass`) notifies observers (like GUI) about blink events
-   - Modular architecture allows easy addition of new observers
 
-3. **Calibration System** ⚖️
+3. **Calibration System** 
    - 10-second calibration process to determine user-specific eye ratios
    - Calculates min/max EAR values and sets optimal threshold
 
-4. **Video Processing Pipeline** 🎥
-   - Frame preprocessing with CLAHE (Contrast Limited Adaptive Histogram Equalization)
-   - Real-time FPS display
-   - Facial landmark visualization
-
 ---
 
-### 🧩 Core Components
+### Core Components
 
 1. **Main Execution (`main.py`)**:
 ```python
@@ -71,7 +65,7 @@ sistema.executar()
 
 ---
 
-### 🛠️ Technical Implementation
+### Technical Implementation
 
 **Blink Detection Workflow**:
 1. Frame capture → CLAHE preprocessing
@@ -95,7 +89,7 @@ def calibrar_razao_olhos(self):
 
 ---
 
-### ⚙️ Configuration Options
+### Configuration Options
 
 1. **Video Source**:
    ```python
@@ -118,7 +112,7 @@ def calibrar_razao_olhos(self):
 
 ---
 
-### 📚 Dependencies
+### Dependencies
 
 ```toml
 [Tool.poetry.dependencies]
@@ -130,7 +124,7 @@ numpy = "^1.24.3"
 
 ---
 
-### 🧪 Testing & Usage
+### Testing & Usage
 
 1. **Calibration**:
    ```python
