@@ -1,7 +1,7 @@
-import observerClasses
-from observerClasses import DataEvent, Observable
+import abcClasses
+from abcClasses import DataEvent, Observable
 import PySimpleGUI as sg
-from observerClasses import Observer
+from abcClasses import Observer
 
 class Menu(Observer):
     def __init__(self):
