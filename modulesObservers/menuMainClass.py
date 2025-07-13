@@ -1,7 +1,7 @@
-import abcClasses
-from abcClasses import DataEvent, Observable
+import padroes.abcClasses as abcClasses
+from padroes.abcClasses import DataEvent, Observable
 import PySimpleGUI as sg
-from abcClasses import Observer
+from padroes.abcClasses import Observer
 
 class Menu(Observer):
     def __init__(self):

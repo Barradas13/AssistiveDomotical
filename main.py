@@ -1,5 +1,5 @@
-from observadoMainClass import observadorMainClass
-from menuMainClass import Menu
+from observables.observableDlib import ObservableDlib
+from modulesObservers.menuMainClass import Menu
 import os
 import numpy as np
 

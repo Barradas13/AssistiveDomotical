@@ -1,6 +1,6 @@
-from poetry.console.commands import self
 
-from abcClasses import *
+from padroes.abcClasses import *
+
 import cv2
 import mediapipe as mp
 import math
@@ -10,7 +10,7 @@ import  time
 #x and y are between 0 and 1 (like a percentage of width and height) so we need to normalize it
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
 
-class BlinkObserver(Observable):
+class ObservableMediaPipe(Observable):
     def attach(self, observer: Observer) -> None:
         print("Subject: Attached an observer.")
         self._observers.append(observer)
@@ -44,13 +44,6 @@ class BlinkObserver(Observable):
     def blinkAtributes(self):
         self.ratios = []
 
-        self.blinkCount = 0
-        self.openedEyes = 10000
-        self.closedEyes = -10
-        self.blinkMap = 0
-        self.piscando = False
-        self.tPiscou = 0
-        self.calibrating = True
         self.frameCount = 1
 
     def confFaceDetection(self):
@@ -105,11 +98,6 @@ class BlinkObserver(Observable):
         self.mediaRatio = np.mean(self.ratios)
         self.ratioMapped = self.mediaRatio * -1
 
-    def calibrate(self):
-        self.calibrating = False
-        self.openedEyes = -4
-        pass
-
     def arrumaDadosNotify(self):
 
         dados = DataEvent()
@@ -146,20 +134,7 @@ class BlinkObserver(Observable):
             try:
                 self.gettingRatio()
 
-                self.calibrating = False #remover dps
-                self.openedEyes = -4 #remover dps
-
-                if self.calibrating:
-                    self.calibrate()
-                else:
-                    self.arrumaDadosNotify()
-
-                if self.ratioMapped < self.closedEyes:
-                    cv2.putText(self.image, str("piscando"), (20, 200), font, 1, (0, 255, 0), 2,
-                                cv2.LINE_AA)
-                else:
-                    cv2.putText(self.image, str("NAO"), (20, 200), font, 1, (0, 255, 0), 2,
-                                cv2.LINE_AA)
+                self.arrumaDadosNotify()
 
                 cv2.line(self.image, self.supEyeCoord, self.infEyeCoord, (255, 0, 0), 4)
                 cv2.line(self.image, self.latEyeCoord, self.latEye2Coord, (0, 0, 255), 4)

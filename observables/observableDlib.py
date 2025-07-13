@@ -1,13 +1,11 @@
 import numpy as np
-
-import observerClasses
 import cv2
 import dlib
 import os
-import equacoes
-from observerClasses import Observable, Observer, DataEvent
 import time
 
+import padroes.equacoes
+from padroes.abcClasses import Observable, Observer, DataEvent
 
 def pegaWebcam(arquivo, video):
     video_capture = video
@@ -22,22 +20,23 @@ def pegaWebcam(arquivo, video):
     return video_capture, detector, predictor
 
 
-class observadorMainClass(Observable):
+class ObservablaDlib(Observable):
 
     def __init__(self, modoCapture) -> None:
         video = cv2.VideoCapture(modoCapture)
         self._observers = []
-        self.video_capture, self.detector, self.preditor = pegaWebcam("shape_predictor_68_face_landmarks.dat", video)
-        self.olhoFechado = False
-        self.tPiscou = 0
+        self.video_capture, self.detector, self.preditor = pegaWebcam("padroes/shape_predictor_68_face_landmarks.dat", video)
         self.pre_timeFrame = 0
         self.new_timeFrame = 0
         self.resized_image = 0
         self.EAR_dir = 0
         self.EAR_esq = 0
         self.limiar = 0.27
+        self.comeco = time.time()
+        self.frameCount = 1
+        self.inicioFrame = 0
 
-    # coloca novos observadores
+     # coloca novos observadores
     def attach(self, observer: Observer) -> None:
         print("Subject: Attached an observer.")
         self._observers.append(observer)
@@ -51,7 +50,7 @@ class observadorMainClass(Observable):
 
         print("Observable: Notifying observers...")
         for observer in self._observers:
-            observer.update(self, dataEvent)
+            observer.update(dataEvent)
 
     def reconhecendoFacesNoFrame(self):
 
@@ -97,34 +96,21 @@ class observadorMainClass(Observable):
                                                (self.shapePrincipal.part(45).x, self.shapePrincipal.part(45).y),
                                                (self.shapePrincipal.part(42).x, self.shapePrincipal.part(42).y))
 
-    def verificacaoEnvioParaObserver(self):
-        if self.detections:
+    def arrumaDadosNotify(self):
+        dados = DataEvent()
+        dados.ear = self.EAR_dir
+        dados.timestamp = time.time() - self.comeco
+        dados.frame = self.frameCount
+        dados.inicio = self.inicioFrame
 
-            if self.detectar_piscada():
-                if not self.olhoFechado:
-                    self.tPiscou = time.time()
-                    self.olhoFechado = True
-
-                cv2.circle(self.frame, (10, 10), 10, (0, 255, 0), thickness=-1)
-            else:
-                cv2.circle(self.frame, (10, 10), 10, (0, 0, 255), thickness=-1)
-
-                if self.olhoFechado:
-                    self.olhoFechado = False
-
-                    if (time.time() - self.tPiscou) > 0.5:
-                        print("Piscou")
-                        dados = DataEvent()
-                        dados.tempo = time.time() - self.tPiscou
-                        print("tempo evento:", time.time() - self.tPiscou)
-
-                        self.notify(dados)
-
-                    self.tPiscou = 0
+        self.notify(dados)
 
     def setandoFrame(self):
+        if self.frame is None or self.frame.size == 0:
+            raise ValueError("Frame vazio ou inválido.")
+
         self.frame = cv2.flip(self.frame, 180)
-        self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        self.gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)  # Agora seguro
         self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         self.clahe_image = self.clahe.apply(self.gray)
 
@@ -145,59 +131,31 @@ class observadorMainClass(Observable):
         cv2.imshow('img', self.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             dados = DataEvent()
-            dados.tempo = False
-            dados.piscou = False
+            dados.ear = False
             self.notify(dados)
             return 1
-
-    def calibrar_razao_olhos(self):
-
-        self.razoes_olhos = []
-        print("Calibração: Por favor, pisque várias vezes...")
-        basetime = time.time()
-
-        while (time.time() - basetime) < 10:
-
-            self.pegandoFrame()
-            self.setandoFrame()
-
-            self.configurandoDetector()
-            self.reconhecendoFacesNoFrame()
-            self.configurandoFrameMostrar()
-            self.razao_olhos = self.EAR_dir
-            if self.razao_olhos > 0.1:
-                self.razoes_olhos.append(self.razao_olhos)
-
-
-        self.razao_min = np.min(self.razoes_olhos)
-        self.razao_max = np.max(self.razoes_olhos)
-
-        self.limiar = (self.razao_max + self.razao_min) / 2
-
-    def detectar_piscada(self):
-
-        # Verifica se a razão dos olhos atual indica olhos fechados
-        if self.EAR_dir <= self.limiar:
-            return True  # Olhos fechados
-        return False  # Olhos abertos
 
     def executar(self):
         while True:
 
+            self.inicioFrame = time.time()
             self.pegandoFrame()
             self.setandoFrame()
 
             self.configurandoDetector()
             self.reconhecendoFacesNoFrame()
             self.configurandoFrameMostrar()
-            self.verificacaoEnvioParaObserver()
+            self.arrumaDadosNotify()
+            self.mostraFrame()
 
             if self.mostraFrame():
                 break
+
+            self.frameCount += 1
 
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    sistema = observadorMainClass("video.mp4")
+    sistema = observadorMainClass(0)
     sistema.executar()

@@ -2,9 +2,9 @@
 then you regulate the time and space for scanning"""
 
 import os
-from observerClasses import *
+from padroes.observerClasses import *
 import pyautogui
-from observadoMainClass import observadorMainClass
+from observables.observableDlib import observadorMainClass
 
 class Teclado(Observer):
     def __init__(self):

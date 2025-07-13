@@ -1,5 +1,5 @@
-from abcClasses import Observer, DataEvent
-from observableMediaPipe import BlinkObserver
+from padroes.abcClasses import Observer, DataEvent
+from observables.observableMediaPipe import BlinkObserver
 
 import time
 import pandas as pd
