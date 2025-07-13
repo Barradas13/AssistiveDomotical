@@ -1,4 +1,5 @@
 import cv2
+import keyboard
 
 # Abre a webcam
 cap = cv2.VideoCapture(0)
@@ -26,7 +27,7 @@ while True:
         break
 
     # Define a cor do ponto
-    cor_ponto = (0, 255, 0) if ponto_verde else (0, 0, 255)  # Verde se True, senão Vermelho
+    cor_ponto = (0, 255, 0) if keyboard.is_pressed("a") else (0, 0, 255)  # Verde se True, senão Vermelho
 
     # Desenha o ponto no canto superior esquerdo
     cv2.circle(frame, center=(20, 20), radius=10, color=cor_ponto, thickness=-1)
@@ -41,9 +42,7 @@ while True:
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
-    elif key == ord('a'):
-        ponto_verde = not ponto_verde  # alterna entre vermelho e verde
-
+    
 # Libera os recursos
 cap.release()
 out.release()
