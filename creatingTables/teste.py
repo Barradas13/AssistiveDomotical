@@ -4,8 +4,7 @@ from observables.observableDlib import ObservablaDlib
 
 import time
 import pandas as pd
-import keyboard
-import threading
+import os
 
 class ColetorDados(Observer):
 
@@ -34,7 +33,7 @@ class ColetorDados(Observer):
             "ear": data.ear,
             "fps": 1/ (time.time() - data.inicio),
             "tempo_processamento": time.time() - data.inicio,
-            "piscando" : keyboard.is_pressed('a')
+            "piscando" : data.cor
         })
 
     def retorna_dados(self):
@@ -42,21 +41,38 @@ class ColetorDados(Observer):
 
 #estruturar o projeto com POO e ENG software
 if __name__ == "__main__":
-    dadosMediaPipe = ColetorDados("mediapipe", "1")
-    dadosDlib = ColetorDados("dlib", "2")
+    
+    for video in os.listdir("videos/"):
+        dadosMediaPipe = ColetorDados("mediapipe", "1")
+        dadosDlib = ColetorDados("dlib", "2")
+        
+        caminho_video = "videos/" + video
+        print(f"Processando {caminho_video}")
 
-    olhoMediaPipe = ObservableMediaPipe(0)
-    olhoMediaPipe.attach(dadosMediaPipe)
 
-    olhoDlib = ObservablaDlib(0)
-    olhoDlib.attach(dadosDlib)
+        print("\nProcesso MediaPipe:")
 
-    #threading.Thread(target=olhoDlib.executar).start()
-    olhoMediaPipe.execute()
-    #olhoDlib.executar()
+        olhoMediaPipe = ObservableMediaPipe(caminho_video)
+        olhoMediaPipe.attach(dadosMediaPipe)
+        olhoMediaPipe.execute()
 
-    #dfMediaPipe = pd.DataFrame(dadosMediaPipe.retorna_dados())
-    #dfMediaPipe.to_csv(r"tabelas\mediaPipe.csv", index=False)
+        print("Processo MediaPipe Concluido!")
+        print("Criando Tabela:")
+        
+        dfMediaPipe = pd.DataFrame(dadosMediaPipe.retorna_dados())
+        dfMediaPipe.to_csv(f"tabelas/{video}MP.csv", index=False)
+        
+        print("\nProcesso Dlib:")
 
-    #dfDlib = pd.DataFrame(dadosDlib.retorna_dados())
-    #dfDlib.to_csv(r"tabelas\dlib.csv", index=False)
+        olhoDlib = ObservablaDlib(caminho_video)
+        olhoDlib.attach(dadosDlib)
+        olhoDlib.executar()
+
+        print("Processo Dlib Concluido!")
+        print("Criando Tabela:")
+        
+        dfDlib = pd.DataFrame(dadosDlib.retorna_dados())
+        dfMediaPipe.to_csv(f"tabelas/{video}DLIB.csv", index=False)
+
+
+

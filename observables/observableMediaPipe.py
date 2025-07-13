@@ -106,6 +106,15 @@ class ObservableMediaPipe(Observable):
         dados.frame = self.frameCount
         dados.inicio = self.inicioFrame
 
+        b, g, r = self.image[20, 20]
+
+        if r > g and r > b:
+            dados.cor = "vermelho"
+        elif g > r and g > b:
+            dados.cor = "verde"
+        else:
+            dados.cor = "indefinido"
+            
         self.notify(dados)
 
     def execute(self):
