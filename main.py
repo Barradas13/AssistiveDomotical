@@ -1,21 +1,17 @@
-from observables.observableDlib import ObservableDlib
+import threading
+import wx
+from observables import observableDlib
 from modulesObservers.menuMainClass import Menu
-import os
-import numpy as np
-
-import threading    
 
 if __name__ == "__main__":
-    sistema = observadorMainClass("video.mp4")
-    #sistema.calibrar_razao_olhos()
-    #print(sistema.razao_max)
-    #print(sistema.limiar)
-    #print(sistema.razao_min)
+    app = wx.App(False)
 
     menu = Menu()
+
+    sistema = observableDlib.ObservableDlib(0)
     sistema.attach(menu)
 
-    x = threading.Thread(target=menu.run)
-    x.start()
+    thread_sistema = threading.Thread(target=sistema.executar, daemon=True)
+    thread_sistema.start()
 
-    sistema.executar()
+    app.MainLoop()

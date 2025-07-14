@@ -1,78 +1,89 @@
-import padroes.abcClasses as abcClasses
-from padroes.abcClasses import DataEvent, Observable
-import PySimpleGUI as sg
-from padroes.abcClasses import Observer
+import wx
+from padroes.abcClasses import DataEvent
 
-class Menu(Observer):
+class Menu(wx.Frame):
     def __init__(self):
+        super().__init__(None, title="MENU INTERAÇÃO FACIAL", size=(600, 150))
         self.botoes = ['TELEVISÃO', 'LUZ DA SALA', 'LUZ DA COZINHA', 'AR CONDICIONADO']
         self.botao_selecionado = -1
-        self.window = None
-        self.parar = False
-        self.isAlive = True
-        
+        self.piscando = False
+        self.piscandoInicio = 0
+        self.piscandoFim = 0
 
-    def create_layout(self):
-        layout = [[sg.Button(button, key=f'button_{i}', button_color=('white', 'black'), size=(13, 6)) for i, button in enumerate(self.botoes)]]
-        return layout
+        panel = wx.Panel(self)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-    def run(self):
-        self.window = sg.Window('MENU INTERAÇÃO FACIAL', self.create_layout(), size=(500, 130))
-        while self.isAlive:
-            event, values = self.window.read()
-            if event in (sg.WINDOW_CLOSED, 'Exit') or self.parar:
-                break
+        self.btn_widgets = []
+        for i, label in enumerate(self.botoes):
+            btn = wx.Button(panel, label=label, size=(130, 60))
+            btn.Bind(wx.EVT_BUTTON, self.make_on_click(i))
+            hbox.Add(btn, flag=wx.ALL, border=5)
+            self.btn_widgets.append(btn)
 
-            for i, button in enumerate(self.botoes):
-                if event == f'button_{i}':
-                    self.selecionar_botao(button)
-                    self.highlight_botaoSelecionado()
-                    self.mostrar_prompt_interacao()
-        print("trhead died")
-        self.window.close()
-        
+        panel.SetSizer(hbox)
+        self.Centre()
+        self.Show()
 
-    def selecionar_botao(self, button):
-        self.botao_selecionado = self.botoes.index(button)
+    def make_on_click(self, index):
+        def on_click(event):
+            self.selecionar_botao(index)
+        return on_click
 
-    def selecionar_botao_direita(self):
-        # Função para selecionar o próximo botão.
-        self.botao_selecionado = (self.botao_selecionado + 1) % len(self.botoes)
-        print("")
-
-    def interagir_botao_selecionado(self, tempo):
-        selected_button = self.botoes[self.botao_selecionado]
-        print(f'Interacting with {selected_button} button!')
-        print(selected_button)
-        return selected_button
-    
-
-    def mostrar_prompt_interacao(self):
-        selected_button = self.botoes[self.botao_selecionado]
-        print(f'Selected {selected_button} button!')
-        return selected_button
+    def selecionar_botao(self, index):
+        self.botao_selecionado = index
+        self.highlight_botaoSelecionado()
+        self.mostrar_prompt_interacao()
 
     def highlight_botaoSelecionado(self):
-        for i, button in enumerate(self.botoes):
+        for i, btn in enumerate(self.btn_widgets):
             if i == self.botao_selecionado:
-                self.window[f'button_{i}'].update(button_color=('white', 'blue'))
+                btn.SetBackgroundColour(wx.Colour(0, 0, 255))  # azul
             else:
-                self.window[f'button_{i}'].update(button_color=('white', 'black'))
+                btn.SetBackgroundColour(wx.Colour(240, 240, 240))  # padrão
 
+            btn.Refresh()
 
-    def update(self,  subject: Observable, dataEvent: DataEvent) -> None:
+    def mostrar_prompt_interacao(self):
+        if self.botao_selecionado >= 0:
+            print(f'Selected {self.botoes[self.botao_selecionado]} button!')
+
+    def selecionar_botao_direita(self):
+        self.botao_selecionado = (self.botao_selecionado + 1) % len(self.botoes)
+        self.highlight_botaoSelecionado()
+        self.mostrar_prompt_interacao()
+
+    def interagir_botao_selecionado(self, tempo):
+        if self.botao_selecionado >= 0:
+            print(f'Interacting with {self.botoes[self.botao_selecionado]} button! Tempo piscando: {tempo:.2f}s')
+
+    def muda_btn(self):
+        self.selecionar_botao_direita()
+
+    def interage_btn(self, tempo):
+        self.interagir_botao_selecionado(tempo)
+
+    def update(self, dataEvent: DataEvent) -> None:
+        # Como update pode vir de outra thread, agende o processamento na thread da GUI
+        wx.CallAfter(self._process_update, dataEvent)
+
+    def _process_update(self, dataEvent: DataEvent):
         try:
-            if dataEvent.piscou and dataEvent.tempo <= 1.5:
-                self.selecionar_botao_direita()
-                self.highlight_botaoSelecionado()
-                self.mostrar_prompt_interacao()
-            elif dataEvent.piscou and dataEvent.tempo > 1.5:
-                self.interagir_botao_selecionado(dataEvent.tempo)
-                self.mostrar_prompt_interacao()
-            elif not dataEvent.piscou and not dataEvent.tempo:
-                self.isAlive = False
-                self.window.close()
-                self.parar = True
-                
-        except AttributeError:
-            pass
+            if dataEvent.ear < 0.27 and not self.piscando:
+                self.piscando = True
+                self.piscandoInicio = dataEvent.inicio
+            elif dataEvent.ear > 0.27 and self.piscando:
+                self.piscando = False
+                self.piscandoFim = dataEvent.inicio
+                tempoPiscando = self.piscandoFim - self.piscandoInicio
+                if tempoPiscando > 1.5:
+                    self.interage_btn(tempoPiscando)
+                elif tempoPiscando > 0.3:
+                    self.muda_btn()
+        except Exception as e:
+            print(f"Erro no update: {e}")
+
+# Código para rodar a aplicação:
+if __name__ == "__main__":
+    app = wx.App()
+    menu = Menu()
+    app.MainLoop()
