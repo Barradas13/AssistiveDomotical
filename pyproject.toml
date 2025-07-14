@@ -15,7 +15,7 @@ opencv-python = "^4.10.0.84"
 keyboard = "^0.13.5"
 mediapipe = "^0.10.21"
 pandas = "^2.3.0"
-wxpython = "^4.2.3"
+pynput = "^1.8.1"
 
 
 [build-system]
