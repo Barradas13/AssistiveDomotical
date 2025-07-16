@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("/home/barradas/Downloads/AssistiveDomotical/tabelas/totalDLIB.csv")
+df = pd.read_csv("OSEMN/scrub/tabelasLimpas/tabela_tratada_dlib.csv")
 
 df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
 
@@ -21,7 +21,7 @@ plt.tight_layout()
 
 plt.show()
 
-df = pd.read_csv("/home/barradas/Downloads/AssistiveDomotical/tabelas/totalMP.csv")
+df = pd.read_csv("OSEMN/scrub/tabelasLimpas/tabela_tratada_mp.csv")
 
 df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
 

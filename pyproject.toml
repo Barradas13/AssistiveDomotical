@@ -16,6 +16,7 @@ keyboard = "^0.13.5"
 mediapipe = "^0.10.21"
 pandas = "^2.3.0"
 pynput = "^1.8.1"
+seaborn = "^0.13.2"
 
 
 [build-system]
