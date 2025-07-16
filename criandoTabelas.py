@@ -64,7 +64,7 @@ if __name__ == "__main__":
         
         print("\nProcesso Dlib:")
 
-        olhoDlib = ObservablaDlib(caminho_video)
+        olhoDlib = ObservableDlib(caminho_video)
         olhoDlib.attach(dadosDlib)
         olhoDlib.executar()
 
