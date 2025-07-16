@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv("/home/barradas/Downloads/AssistiveDomotical/tabelas/totalDLIB.csv")
 
-df = df[df['timestamp'] < 30.0]
+df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
 
 cores = df['piscando'].map({'vermelho': 'red', 'verde': 'green'})
 
@@ -23,7 +23,7 @@ plt.show()
 
 df = pd.read_csv("/home/barradas/Downloads/AssistiveDomotical/tabelas/totalMP.csv")
 
-df = df[df['timestamp'] < 30.0]
+df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
 
 cores = df['piscando'].map({'vermelho': 'red', 'verde': 'green'})
 
