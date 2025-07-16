@@ -11,8 +11,10 @@ class Teclado(Observer):
         os.startfile("osk.exe")
 
     def update(self, subject: Observable, dataEvent:DataEvent) -> None:
-        pyautogui.press("space")
-        print("oi")
+        
+        if dataEvent.ear < 0.27:
+            pyautogui.press("space")
+            print("oi")
 
 if __name__ == "__main__":
     sistema = observadorMainClass(1)
