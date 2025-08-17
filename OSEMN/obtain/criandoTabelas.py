@@ -1,6 +1,5 @@
 from padroes import abcClasses
 from observables.observableMediaPipe import ObservableMediaPipe
-from observables.observableDlib import ObservableDlib
 
 import time
 import pandas as pd
@@ -10,14 +9,11 @@ class ColetorDados(abcClasses.Observer):
 
     dados = []
 
-    def __init__(self, biblioteca, metodo):
-        self.metodo = metodo
-        self.biblioteca = biblioteca
-
     def mostrar(self, data):
         print("")
         print("#################")
         print("ear: ", data.ear)
+        print("pontos olho:", data.pontos_olho)
         print("tempo: ", data.timestamp)
         print("frame: ", data.frame)
         print("#################")
@@ -28,9 +24,8 @@ class ColetorDados(abcClasses.Observer):
         self.dados.append({
             "frame_idx": data.frame,
             "timestamp": data.timestamp,
-            "biblioteca": self.biblioteca,
-            "abordagem": self.metodo,
             "ear": data.ear,
+            "pontos_olho": data.pontos_olho,
             "fps": 1/ (time.time() - data.inicio),
             "tempo_processamento": time.time() - data.inicio,
             "piscando" : data.cor
@@ -42,11 +37,10 @@ class ColetorDados(abcClasses.Observer):
 #estruturar o projeto com POO e ENG software
 if __name__ == "__main__":
     
-    for video in os.listdir("videos/"):
-        dadosMediaPipe = ColetorDados("mediapipe", "1")
-        dadosDlib = ColetorDados("dlib", "2")
+    for video in os.listdir("AssistiveDomotical\\videos\\"):
+        dadosMediaPipe = ColetorDados()
         
-        caminho_video = "videos/" + video
+        caminho_video = "AssistiveDomotical\\videos\\" + video
         print(f"Processando {caminho_video}")
 
 
@@ -58,21 +52,6 @@ if __name__ == "__main__":
 
         print("Processo MediaPipe Concluido!")
         print("Criando Tabela:")
-        
+
         dfMediaPipe = pd.DataFrame(dadosMediaPipe.retorna_dados())
-        dfMediaPipe.to_csv(f"tabelas/{video}MP.csv", index=False)
-        
-        print("\nProcesso Dlib:")
-
-        olhoDlib = ObservableDlib(caminho_video)
-        olhoDlib.attach(dadosDlib)
-        olhoDlib.executar()
-
-        print("Processo Dlib Concluido!")
-        print("Criando Tabela:")
-        
-        dfDlib = pd.DataFrame(dadosDlib.retorna_dados())
-        dfMediaPipe.to_csv(f"tabelas/{video}DLIB.csv", index=False)
-
-
-
+        dfMediaPipe.to_csv(f"AssistiveDomotical\\OSEMN\\obtain\\tabelasBrutas\\{video}MP.csv", index=False)

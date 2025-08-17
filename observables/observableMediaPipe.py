@@ -6,6 +6,7 @@ import mediapipe as mp
 import math
 import numpy as np
 import  time
+import os
 
 #x and y are between 0 and 1 (like a percentage of width and height) so we need to normalize it
 from mediapipe.python.solutions.drawing_utils import _normalized_to_pixel_coordinates
@@ -29,7 +30,7 @@ class ObservableMediaPipe(Observable):
         self.cap = cv2.VideoCapture(modoCaptura)
 
         # just 25 fps
-        self.cap.set(cv2.CAP_PROP_FPS, 25.0)
+        self.cap.set(cv2.CAP_PROP_FPS, 1)
 
         # adjusting to camera's height and width
         self.width = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -87,24 +88,21 @@ class ObservableMediaPipe(Observable):
         self.gettingEyesPoints()
         self.ratio = self.gettingDists()
 
-        if self.ratio <= 0:
-            self.ratio = self.ratios[0]
-
-        self.ratios.append(self.ratio)
-
-        if (len(self.ratios) == 5):
-            self.ratios.pop(0)
-
-        self.mediaRatio = np.mean(self.ratios)
-        self.ratioMapped = self.mediaRatio * -1
 
     def arrumaDadosNotify(self):
 
         dados = DataEvent()
-        dados.ear = self.ratioMapped
+        dados.ear = self.ratio
         dados.timestamp = time.time() - self.comeco
         dados.frame = self.frameCount
         dados.inicio = self.inicioFrame
+
+        pontos_olhos = [398, 384, 385, 386, 387, 388, 466, 249, 390, 477, 374, 380, 381, 382, 476, 473, 474, 362, 373]
+
+        dados.pontos_olho = []
+
+        for i in pontos_olhos:
+            dados.pontos_olho.append(self.getSpecificPoint(i))
 
         b, g, r = self.image[20, 20]
 
@@ -145,14 +143,6 @@ class ObservableMediaPipe(Observable):
 
                 self.arrumaDadosNotify()
 
-                cv2.line(self.image, self.supEyeCoord, self.infEyeCoord, (255, 0, 0), 4)
-                cv2.line(self.image, self.latEyeCoord, self.latEye2Coord, (0, 0, 255), 4)
-
-
-                cv2.putText(self.image, str(self.ratioMapped), (50, 100), font, 1, (0, 255, 0), 2,
-                            cv2.LINE_AA)
-
-
             except TypeError as e:
                 cv2.putText(self.image, str("nenhum rosto encontrado"), (50, 100), font, 1, (0, 255, 0), 2,
                             cv2.LINE_AA)
@@ -160,5 +150,9 @@ class ObservableMediaPipe(Observable):
             cv2.imshow('MediaPipe Face Mesh', self.image)
             self.frameCount += 1
 
-            if cv2.waitKey(5) & 0xFF == ord('q'):
+            time.sleep(1/25)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
                 break
+

@@ -3,16 +3,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_csv("OSEMN/obtain/tabelasBrutas/totalMP.csv")
+df = pd.read_csv("AssistiveDomotical\\OSEMN\\obtain\\tabela_com_estado.csv")
 
-# Trocando de negativo para positivo
 
-df['ear'] = df['ear'].abs()
+# Mostra apenas as linhas onde pontos_olho é Null (NaN)
+linhas_nulas = df[df["pontos_olho"].isna()]
+
+df.loc[df["pontos_olho"].isna(), "ear"] = np.nan
 
 
 # Verificando nulos
 print(df.isnull().sum())
 
+df["pontos_olho"] = df["pontos_olho"].fillna(method="ffill")
+
+df["pontos_olho"] = df["pontos_olho"].fillna(method="bfill")
+
+
+df["ear"] = df["ear"].fillna(method="ffill")
+
+df["ear"] = df["ear"].fillna(method="bfill")
 
 # Verificando OUTLIERS
 
@@ -22,75 +32,11 @@ plt.title('Boxplot das Ear - Identificação de Outliers')
 plt.xlabel('ear')
 plt.show()
 
-# Perceba que existem diversos outliers
-# dentro deles vão existir dois: os verdes, os vermelhos
-# sendo os verdes aqueles que representam o olho aberto
-# e os vermelhos os que representam o olho fechado
+l_s = 35
+l_i = 0
 
-
-df_ear_verde = df[df["piscando"] == "verde"]["ear"]
-df_ear_vermelho = df[df["piscando"] == "vermelho"]["ear"]
-
-# Utilizando o metodo IQR (Intervalo Interquartil)
-
-print("\nVERDES: ")
-
-MIN = df_ear_verde.quantile(0.0)
-Q1 = df_ear_verde.quantile(0.25)
-Q3 = df_ear_verde.quantile(0.75)
-Q2 = df_ear_verde.quantile(0.50)
-MAX = df_ear_verde.quantile(1.0)
-
-mediana = df_ear_verde.median()
-
-IQR = Q3 - Q1
-
-
-print(f"Q1: {Q1}, Q3: {Q3}, IQR: {IQR}, Q2: {Q2}, Median: {mediana}, MAX: {MAX}, MIN: {MIN}")
-
-# Definindo Limites
-
-limite_inferior = Q1 - 1.5 * IQR
-limite_superior = Q3 + 1.5 * IQR
-print(f"Limite inferior: {limite_inferior}")
-print(f"Limite superior: {limite_superior}")
-
-df.loc[
-    (df["piscando"] == "verde") &
-    ((df["ear"] > limite_superior) |
-    (df["ear"] < limite_inferior)),
-    "ear"
-] = mediana
-
-
-
-print("\nVERMELHOS:")
-
-MIN = df_ear_vermelho.quantile(0.0)
-Q1 = df_ear_vermelho.quantile(0.25)
-Q3 = df_ear_vermelho.quantile(0.75)
-Q2 = df_ear_vermelho.quantile(0.50)
-MAX = df_ear_vermelho.quantile(1.0)
-
-mediana = df_ear_vermelho.median()
-
-IQR = Q3 - Q1
-
-print(f"Q1: {Q1}, Q3: {Q3}, IQR: {IQR}, Q2: {Q2}, Median: {mediana}, MAX: {MAX}, MIN: {MIN}")
-
-# Definindo Limites
-
-limite_inferior = Q1 - 1.5 * IQR
-limite_superior = Q3 + 1.5 * IQR
-print(f"Limite inferior: {limite_inferior}")
-print(f"Limite superior: {limite_superior}")
-
-df.loc[
-    (df["piscando"] == "vermelho") &
-    ((df["ear"] > limite_superior) |
-    (df["ear"] < limite_inferior)),
-    "ear"
-] = mediana
+df.loc[df["ear"] > l_s, "ear"] = l_s
+df.loc[df["ear"] < l_i, "ear"] = l_i
 
 
 # Tabela pós tratamento
@@ -102,4 +48,4 @@ plt.xlabel('ear')
 plt.show()
 
 
-df.to_csv("OSEMN/scrub/tabelasLimpas/tabela_tratada_mp.csv", index=False)
+df.to_csv("tabela_tratada_mp.csv", index=False)

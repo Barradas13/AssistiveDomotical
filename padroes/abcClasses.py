@@ -10,6 +10,7 @@ class DataEvent():
     frame = 0
     timestamp = 0
     inicio = 0
+    pontos_olho = []
 
 #cria o observavel que tem funções para colocar tirar e notificar
 class Observable(ABC):

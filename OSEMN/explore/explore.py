@@ -1,41 +1,46 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("OSEMN/scrub/tabelasLimpas/tabela_tratada_dlib.csv")
+# Leitura e filtro
+df = pd.read_csv("tabela_final.csv")
+df = df[(df['frame_global'] > 9790) & (df['frame_global'] < 9820)]
 
-df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
-
-cores = df['piscando'].map({'vermelho': 'red', 'verde': 'green'})
+# Cores para os pontos
+cores = df['piscando'].map({False: 'red', True: 'green'})
 
 plt.figure(figsize=(14, 6))
+
+# Scatter plot do EAR
 plt.scatter(df['timestamp'], df['ear'], c=cores, s=10, alpha=0.8)
 
+# Destacar piscadas curtas ou longas
+estado_atual = None
+inicio = None
 
-plt.title('EAR vs Tempo (com piscando em cores) DLIB')
+for i, row in df.iterrows():
+    if row['estado'] != "nao piscou":
+        if estado_atual != row['estado']:
+            # Começo de um novo estado de piscada
+            inicio = row['timestamp']
+            estado_atual = row['estado']
+    else:
+        if estado_atual is not None:
+            # Fim do estado de piscada, desenha faixa
+            fim = row['timestamp']
+            cor = 'blue' if estado_atual == 'piscou curto' else 'purple'
+            plt.axvspan(inicio, fim, color=cor, alpha=0.2)
+            estado_atual = None
+            inicio = None
+
+# Caso o último frame seja uma piscada
+if estado_atual is not None and inicio is not None:
+    fim = df['timestamp'].iloc[-1]
+    cor = 'blue' if estado_atual == 'piscou curto' else 'purple'
+    plt.axvspan(inicio, fim, color=cor, alpha=0.2)
+
+plt.title('EAR vs Tempo com piscadas destacadas')
 plt.xlabel('Tempo (s)')
 plt.ylabel('EAR')
 plt.grid(True)
 plt.tight_layout()
-
-
-plt.show()
-
-df = pd.read_csv("OSEMN/scrub/tabelasLimpas/tabela_tratada_mp.csv")
-
-df = df[(df['timestamp'] > 400.0) & (df['timestamp'] < 430.0)]
-
-cores = df['piscando'].map({'vermelho': 'red', 'verde': 'green'})
-
-plt.figure(figsize=(14, 6))
-plt.scatter(df['timestamp'], df['ear'], c=cores, s=10, alpha=0.8)
-
-
-plt.title('EAR vs Tempo (com piscando em cores) MP')
-plt.xlabel('Tempo (s)')
-plt.ylabel('EAR')
-plt.grid(True)
-plt.tight_layout()
-
-
 plt.show()

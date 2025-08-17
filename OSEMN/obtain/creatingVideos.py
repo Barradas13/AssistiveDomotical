@@ -33,8 +33,11 @@ frame_height = int(cap.get(4))
 fps = 20
 codec = cv2.VideoWriter_fourcc(*'mp4v')
 
-out = cv2.VideoWriter('/home/barradas/Downloads/AssistiveDomotical/videos/saida.mp4',
-                      codec, fps, (frame_width, frame_height))
+out = cv2.VideoWriter(
+    r"C:\Users\claudio.barradas\PycharmProjects\Domotic\teste\AssistiveDomotical\videos\felipe.mp4",
+    codec, fps, (frame_width, frame_height)
+)
+
 
 print("Gravando... Segure 'a' para ponto verde. Pressione 'q' para sair.")
 
