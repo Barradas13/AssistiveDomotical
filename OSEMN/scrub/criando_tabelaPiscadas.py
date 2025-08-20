@@ -10,14 +10,26 @@ import os
 
 
 
-for tabela in os.listdir("/home/barradas/Downloads/AssistiveDomotical/OSEMN/obtain/tabelasBrutas"):
+for tabela in os.listdir("C:\\Users\\claudio.barradas\\PycharmProjects\\Domotic\\teste\\AssistiveDomotical\\OSEMN\\obtain\\tabelasBrutas"):
     resultados = []
     
-    df = pd.read_csv(f"/home/barradas/Downloads/AssistiveDomotical/OSEMN/obtain/tabelasBrutas/{tabela}")
+    df = pd.read_csv(f"C:\\Users\\claudio.barradas\\PycharmProjects\\Domotic\\teste\\AssistiveDomotical\\OSEMN\\obtain\\tabelasBrutas\\{tabela}")
 
     linhas_nulas = df[df["pontos_olho"].isna()]
 
     df.loc[df["pontos_olho"].isna(), "ear"] = np.nan
+
+    # Verificando nulos
+    print(df.isnull().sum())
+
+    df["pontos_olho"] = df["pontos_olho"].fillna(method="ffill")
+
+    df["pontos_olho"] = df["pontos_olho"].fillna(method="bfill")
+
+    df["ear"] = df["ear"].fillna(method="ffill")
+
+    df["ear"] = df["ear"].fillna(method="bfill")
+
 
     l_s = 35
     l_i = 0
@@ -71,7 +83,7 @@ for tabela in os.listdir("/home/barradas/Downloads/AssistiveDomotical/OSEMN/obta
 
 
     df_final = pd.DataFrame(resultados)
-    df_final.to_csv(f"/home/barradas/Downloads/AssistiveDomotical/OSEMN/scrub/tabelas_pessoa_pos_tratamento/{tabela}")
+    df_final.to_csv(f"C:\\Users\\claudio.barradas\\PycharmProjects\\Domotic\\teste\\AssistiveDomotical\\OSEMN\\scrub\\tabelas_pessoa_pos_tratamento\\{tabela}")
 
     print()
     print(tabela)

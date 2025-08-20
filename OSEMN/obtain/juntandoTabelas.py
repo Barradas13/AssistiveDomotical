@@ -16,3 +16,4 @@ df_final = pd.concat(dfs, ignore_index=True)
 df_final.to_csv("AssistiveDomotical\\OSEMN\\obtain\\tabela_unica.csv", index=False)
 
 print("Tabelas unidas em 'tabela_unica.csv'")
+print(df_final.shape)
