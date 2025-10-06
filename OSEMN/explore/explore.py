@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 # Leitura e filtro
 df = pd.read_csv("tabela_final.csv")
-df = df[(df['frame_global'] > 9790) & (df['frame_global'] < 9820)]
+df = df[(df['frame_global'] > 9800) & (df['frame_global'] < 9870)]
 
 # Cores para os pontos
-cores = df['piscando'].map({False: 'red', True: 'green'})
+cores = df['piscando'].map({False: 'black', True: 'black'})
 
 plt.figure(figsize=(14, 6))
 
@@ -27,7 +27,7 @@ for i, row in df.iterrows():
         if estado_atual is not None:
             # Fim do estado de piscada, desenha faixa
             fim = row['timestamp']
-            cor = 'blue' if estado_atual == 'piscou curto' else 'purple'
+            cor = 'black' if estado_atual == 'piscou curto' else 'black'
             plt.axvspan(inicio, fim, color=cor, alpha=0.2)
             estado_atual = None
             inicio = None
@@ -35,12 +35,13 @@ for i, row in df.iterrows():
 # Caso o último frame seja uma piscada
 if estado_atual is not None and inicio is not None:
     fim = df['timestamp'].iloc[-1]
-    cor = 'blue' if estado_atual == 'piscou curto' else 'purple'
+    cor = 'black' if estado_atual == 'piscou curto' else 'black'
     plt.axvspan(inicio, fim, color=cor, alpha=0.2)
 
-plt.title('EAR vs Tempo com piscadas destacadas')
+plt.title('EAR vs Tempo com piscadas destacadas (escala de cinza)')
 plt.xlabel('Tempo (s)')
 plt.ylabel('EAR')
-plt.grid(True)
+plt.grid(True, color='gray', linestyle='--', alpha=0.5)
 plt.tight_layout()
 plt.show()
+plt.savefig('ear_piscadas_destacado_escala_cinza.png', dpi=300)

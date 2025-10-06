@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 # Lista de pontos
-pontos = [(-12, -3), (-9, -2), (-4, 0), (1, 1), (6, 2), (10, 2), (13, 2), (13, 2), (10, 3), (-1, 5), (1, 2), (-4, 1), (-9, -1), (-12, -2), (-7, -1), (0, 0), (6, 1), (-14, -3), (6, 3)]
+pontos = [(-11, -3), (-8, -2), (-3, 0), (2, 1), (7, 2), (11, 2), (14, 2), (13, 2), (11, 2), (0, 5), (2, 2), (-4, 1), (-8, -1), (-11, -2), (-6, -1), (0, 0), (7, 0), (-13, -3), (7, 2)]
 
 # Separar coordenadas X e Y
 labels = [398, 384, 385, 386, 387, 388, 466, 249, 390, 477, 
@@ -12,17 +12,17 @@ x, y = zip(*pontos)
 
 # Criar gráfico de dispersão
 plt.figure(figsize=(6, 6))
-plt.scatter(x, y, color="blue", marker="o", s=50)
+plt.scatter(x, y, color="black", marker="o", s=50)
 
 # Adicionar rótulos em cada ponto
 for (xi, yi, label) in zip(x, y, labels):
-    plt.text(xi + 0.3, yi + 0.3, str(label), fontsize=9, color="red")
+    plt.text(xi + 0.3, yi + 0.3, str(label), fontsize=9, color="black")
 
 # Configurações
-plt.title("Pontos com numeração")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.grid(True)
 plt.axhline(0, color='black', linewidth=0.8)
 plt.axvline(0, color='black', linewidth=0.8)
 plt.show()
+plt.savefig('olho_fechado.png', dpi=300)
